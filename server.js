@@ -17,7 +17,7 @@ let gameOver = false;
 
 // tickets: { [id]: { id, name, nums[], winner, ready } }
 let tickets = {};
-let expectedPlayersCount = 0; // πόσα ονόματα μπήκαν στο bulk panel
+let expectedPlayersCount = 0;
 
 /* ===== HELPERS ===== */
 
@@ -59,15 +59,9 @@ function areAllExpectedPlayersReady() {
 
 /* ===== HTTP API ===== */
 
-/** Κλήρωση αριθμού */
 app.get("/api/draw", (req, res) => {
-  if (gameOver) {
-    return res.json({ done: true, gameOver: true });
-  }
-
-  if (!running) {
-    return res.json({ error: "Game not running" });
-  }
+  if (gameOver) return res.json({ done: true, gameOver: true });
+  if (!running) return res.json({ error: "Game not running" });
 
   if (numbers.length === 0) {
     running = false;
@@ -91,11 +85,8 @@ app.get("/api/draw", (req, res) => {
   res.json({ number: num, drawn, players });
 });
 
-/** Start game (θα καλείται από την TV μετά το countdown) */
 app.post("/api/start", (req, res) => {
-  if (gameOver) {
-    return res.json({ ok: false, gameOver: true });
-  }
+  if (gameOver) return res.json({ ok: false, gameOver: true });
 
   if (expectedPlayersCount > 0 && !areAllExpectedPlayersReady()) {
     return res.json({ ok: false, reason: "not_all_ready" });
@@ -105,13 +96,11 @@ app.post("/api/start", (req, res) => {
   res.json({ ok: true });
 });
 
-/** Stop game */
 app.post("/api/stop", (req, res) => {
   running = false;
   res.json({ ok: true });
 });
 
-/** Reset παιχνιδιού */
 app.post("/api/reset", (req, res) => {
   numbers = Array.from({ length: 75 }, (_, i) => i + 1);
   drawn = [];
@@ -124,15 +113,29 @@ app.post("/api/reset", (req, res) => {
   });
 
   broadcast({ type: "reset" });
-  broadcast({
-    type: "players",
-    players: getPlayersProgress()
-  });
+  broadcast({ type: "players", players: getPlayersProgress() });
 
   res.json({ ok: true });
 });
 
-/** Δημιουργία ΕΝΟΣ ticket */
+/* ===== NEW GAME — FULL RESET ===== */
+
+app.post("/api/newgame", (req, res) => {
+  numbers = Array.from({ length: 75 }, (_, i) => i + 1);
+  drawn = [];
+  running = false;
+  gameOver = false;
+
+  tickets = {};               // Σβήνουμε όλα τα κουπόνια
+  expectedPlayersCount = 0;   // Σβήνουμε το bulk count
+
+  broadcast({ type: "newgame" });
+
+  res.json({ ok: true });
+});
+
+/* ===== TICKETS ===== */
+
 app.post("/api/ticket", (req, res) => {
   const { name } = req.body || {};
 
@@ -152,15 +155,11 @@ app.post("/api/ticket", (req, res) => {
     ready: false
   };
 
-  broadcast({
-    type: "players",
-    players: getPlayersProgress()
-  });
+  broadcast({ type: "players", players: getPlayersProgress() });
 
   res.json({ ticketId });
 });
 
-/** Bulk δημιουργία tickets */
 app.post("/api/tickets/bulk", (req, res) => {
   const { names } = req.body || {};
   if (!Array.isArray(names) || names.length === 0) {
@@ -194,36 +193,26 @@ app.post("/api/tickets/bulk", (req, res) => {
     created.push({ name, ticketId });
   });
 
-  broadcast({
-    type: "players",
-    players: getPlayersProgress()
-  });
+  broadcast({ type: "players", players: getPlayersProgress() });
 
   res.json(created);
 });
 
-/** Παίρνουμε ticket-info */
 app.get("/api/ticket/:id", (req, res) => {
   const ticket = tickets[req.params.id];
   if (!ticket) return res.status(404).json({ error: "Not found" });
   res.json(ticket);
 });
 
-/** Παίκτης δηλώνει "Είμαι έτοιμος" */
 app.post("/api/ready/:id", (req, res) => {
   const ticket = tickets[req.params.id];
-  if (!ticket) {
-    return res.status(404).json({ error: "Ticket not found" });
-  }
+  if (!ticket) return res.status(404).json({ error: "Ticket not found" });
 
   ticket.ready = true;
 
   const allReady = areAllExpectedPlayersReady();
 
-  broadcast({
-    type: "players",
-    players: getPlayersProgress()
-  });
+  broadcast({ type: "players", players: getPlayersProgress() });
 
   if (allReady) {
     broadcast({
@@ -235,7 +224,6 @@ app.post("/api/ready/:id", (req, res) => {
   res.json({ ok: true, allReady });
 });
 
-/** Παίκτης φωνάζει BINGO */
 app.post("/api/bingo/:id", (req, res) => {
   const ticket = tickets[req.params.id];
   if (!ticket) return res.json({ winner: false });
@@ -262,14 +250,9 @@ app.post("/api/bingo/:id", (req, res) => {
     winner
   });
 
-  broadcast({
-    type: "players",
-    players: getPlayersProgress()
-  });
+  broadcast({ type: "players", players: getPlayersProgress() });
 
-  if (winner) {
-    broadcast({ type: "gameover" });
-  }
+  if (winner) broadcast({ type: "gameover" });
 
   res.json({ winner });
 });
@@ -300,13 +283,9 @@ wss.on("connection", ws => {
 function broadcast(obj) {
   const msg = JSON.stringify(obj);
   for (const ws of clients) {
-    if (ws.readyState === 1) {
-      ws.send(msg);
-    }
+    if (ws.readyState === 1) ws.send(msg);
   }
 }
-
-/* ===== START SERVER ===== */
 
 server.listen(PORT, () => {
   console.log("✅ Bingo server running on port", PORT);
