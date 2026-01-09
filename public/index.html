@@ -535,6 +535,18 @@ ws.onmessage = (msg) => {
       const last = data.drawn[data.drawn.length - 1];
       show(last, data.drawn);
     }
+    if (data.type === "newgame") {
+  numbersCleared();
+  renderPlayers([]);
+  stopAuto();
+  stopCountdown(true);
+
+  document.getElementById("qrGrid").innerHTML = "";
+  document.getElementById("namesInput").value = "";
+  document.getElementById("qrInfo").textContent = "";
+
+  expectedPlayersCount = 0;
+}
     if (data.players) renderPlayers(data.players);
   }
 
@@ -888,3 +900,4 @@ function stopCountdown(forceHide){
 </body>
 
 </html>
+
