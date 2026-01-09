@@ -1,0 +1,14 @@
+{
+  "name": "bingo-tv",
+  "version": "1.0.0",
+  "description": "Bingo Event System with QR tickets, ready-check, countdown and WebSockets",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.13.0"
+  }
+}
