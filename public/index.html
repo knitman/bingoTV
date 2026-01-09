@@ -431,6 +431,14 @@ audio { display:none; }
 
 <h1>BINGO ΚΛΗΡΩΣΗ</h1>
 
+<div style="margin:20px;">
+  <button onclick="newGame()" 
+          style="padding:12px 24px;font-size:20px;border:none;border-radius:12px;
+                 background:#ff1744;color:white;font-weight:bold;cursor:pointer;">
+    🆕 Νέο Παιχνίδι
+  </button>
+</div>
+
 <div id="number">–</div>
 
 <!-- Ήχοι -->
@@ -627,7 +635,27 @@ function stopAuto(){
     auto = null;
   }
 }
+async function newGame(){
+  if (!confirm("Θέλεις σίγουρα να ξεκινήσεις ΝΕΟ ΠΑΙΧΝΙΔΙ; Όλα θα χαθούν.")) return;
 
+  const res = await fetch("/api/newgame", { method: "POST" });
+  const data = await res.json();
+
+  if (data.ok) {
+    numbersCleared();
+    renderPlayers([]);
+    stopAuto();
+    stopCountdown(true);
+
+    document.getElementById("qrGrid").innerHTML = "";
+    document.getElementById("namesInput").value = "";
+    document.getElementById("qrInfo").textContent = "";
+
+    expectedPlayersCount = 0;
+
+    alert("Ξεκίνησε νέο παιχνίδι!");
+  }
+}
 /* ===== RESET ===== */
 function resetGame(){
   fetch("/api/reset", { method: "POST" });
@@ -858,4 +886,5 @@ function stopCountdown(forceHide){
 </script>
 
 </body>
+
 </html>
