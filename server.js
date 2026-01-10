@@ -15,7 +15,6 @@ let drawn = [];
 let running = false;
 let gameOver = false;
 
-// tickets: { [id]: { id, name, nums[], winner, ready } }
 let tickets = {};
 let expectedPlayersCount = 0;
 
@@ -30,25 +29,134 @@ function generateTicketId() {
 }
 
 function getPlayersProgress() {
-  return Object.values(tickets)
-    .map(t => {
-      const hits = t.nums.filter(n => drawn.includes(n)).length;
-      const total = t.nums.length;
-      const progress = Math.round((hits / total) * 100);
-      return {
-        id: t.id,
-        name: t.name || ("Παίκτης " + t.id),
-        hits,
-        total,
-        progress,
-        winner: !!t.winner,
-        ready: !!t.ready
-      };
-    })
-    .sort((a, b) => b.progress - a.progress);
+  return Object.values(tickets).map(t => {
+    const hits = t.nums.filter(n => drawn.includes(n)).length;
+    return {
+      id: t.id,
+      name: t.name || `Παίκτης ${t.id}`,
+      hits,
+      total: t.nums.length,
+      progress: Math.round((hits / t.nums.length) * 100),
+      winner: !!t.winner,
+      ready: !!t.ready
+    };
+  });
 }
 
 function areAllExpectedPlayersReady() {
   if (!expectedPlayersCount) return false;
-  const allTickets = Object.values(tickets);
-  if (allTick
+  const list = Object.values(tickets);
+  if (list.length < expectedPlayersCount) return false;
+  return list.every(t => t.ready);
+}
+
+/* ===== API ===== */
+
+app.get("/api/draw", (req, res) => {
+  if (!running || gameOver) return res.json({ ok: false });
+
+  const i = Math.floor(Math.random() * numbers.length);
+  const num = numbers.splice(i, 1)[0];
+  drawn.push(num);
+
+  broadcast({
+    type: "number",
+    number: num,
+    drawn,
+    players: getPlayersProgress()
+  });
+
+  res.json({ number: num });
+});
+
+app.post("/api/start", (req, res) => {
+  if (expectedPlayersCount && !areAllExpectedPlayersReady()) {
+    return res.json({ ok: false });
+  }
+  running = true;
+  res.json({ ok: true });
+});
+
+app.post("/api/newgame", (req, res) => {
+  numbers = Array.from({ length: 75 }, (_, i) => i + 1);
+  drawn = [];
+  running = false;
+  gameOver = false;
+  tickets = {};
+  expectedPlayersCount = 0;
+  broadcast({ type: "newgame" });
+  res.json({ ok: true });
+});
+
+/* ===== TICKETS ===== */
+
+app.post("/api/ticket", (req, res) => {
+  const id = generateTicketId();
+  let nums = [];
+  while (nums.length < 15) {
+    const n = Math.floor(Math.random() * 75) + 1;
+    if (!nums.includes(n)) nums.push(n);
+  }
+
+  tickets[id] = {
+    id,
+    name: req.body?.name,
+    nums,
+    winner: false,
+    ready: false
+  };
+
+  broadcast({ type: "players", players: getPlayersProgress() });
+  res.json({ ticketId: id });
+});
+
+app.post("/api/bingo/:id", (req, res) => {
+  const t = tickets[req.params.id];
+  if (!t) return res.json({ winner: false });
+
+  const winner = t.nums.every(n => drawn.includes(n));
+
+  if (winner) {
+    t.winner = true;
+    running = false;
+    gameOver = true;
+    broadcast({ type: "gameover" });
+  }
+
+  broadcast({
+    type: "bingo",
+    id: t.id,
+    name: t.name,
+    winner
+  });
+
+  res.json({ winner });
+});
+
+/* ===== WEBSOCKET ===== */
+
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+const clients = new Set();
+
+wss.on("connection", ws => {
+  clients.add(ws);
+  ws.send(JSON.stringify({
+    type: "state",
+    drawn,
+    players: getPlayersProgress(),
+    gameOver
+  }));
+  ws.on("close", () => clients.delete(ws));
+});
+
+function broadcast(data) {
+  const msg = JSON.stringify(data);
+  clients.forEach(ws => {
+    if (ws.readyState === 1) ws.send(msg);
+  });
+}
+
+server.listen(PORT, () => {
+  console.log("✅ Bingo server running on port", PORT);
+});
