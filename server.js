@@ -24,7 +24,7 @@ function generateTicketId() {
   do {
     id = Math.floor(10000 + Math.random() * 90000);
   } while (tickets[id]);
-  return id.toString();
+  return id;
 }
 
 function getPlayersProgress() {
@@ -47,10 +47,11 @@ function getPlayersProgress() {
 }
 
 function areAllExpectedPlayersReady() {
-  if (!expectedPlayersCount) return true; // 👈 fix για single ticket
-  const list = Object.values(tickets);
-  if (list.length < expectedPlayersCount) return false;
-  return list.every(t => t.ready);
+  if (!expectedPlayersCount) return false;
+  const allTickets = Object.values(tickets);
+  if (allTickets.length < expectedPlayersCount) return false;
+  const readyCount = allTickets.filter(t => t.ready).length;
+  return readyCount >= expectedPlayersCount;
 }
 
 /* ===== HTTP API ===== */
@@ -70,7 +71,12 @@ app.get("/api/draw", (req, res) => {
 
   const players = getPlayersProgress();
 
-  broadcast({ type: "number", number: num, drawn, players });
+  broadcast({
+    type: "number",
+    number: num,
+    drawn,
+    players
+  });
 
   res.json({ number: num, drawn, players });
 });
@@ -125,11 +131,12 @@ app.post("/api/newgame", (req, res) => {
 /* ===== TICKETS ===== */
 app.post("/api/ticket", (req, res) => {
   const { name } = req.body || {};
+
   const ticketId = generateTicketId();
 
   let nums = [];
   while (nums.length < 15) {
-    const n = Math.floor(Math.random() * 75) + 1;
+    let n = Math.floor(Math.random() * 75) + 1;
     if (!nums.includes(n)) nums.push(n);
   }
 
@@ -164,11 +171,18 @@ app.post("/api/tickets/bulk", (req, res) => {
     const ticketId = generateTicketId();
     let nums = [];
     while (nums.length < 15) {
-      const n = Math.floor(Math.random() * 75) + 1;
+      let n = Math.floor(Math.random() * 75) + 1;
       if (!nums.includes(n)) nums.push(n);
     }
 
-    tickets[ticketId] = { id: ticketId, name, nums, winner: false, ready: false };
+    tickets[ticketId] = {
+      id: ticketId,
+      name,
+      nums,
+      winner: false,
+      ready: false
+    };
+
     created.push({ name, ticketId });
   });
 
@@ -185,14 +199,20 @@ app.get("/api/ticket/:id", (req, res) => {
 
 app.post("/api/ready/:id", (req, res) => {
   const ticket = tickets[req.params.id];
-  if (!ticket) return res.status(404).json({ ok: false });
+  if (!ticket) return res.status(404).json({ error: "Ticket not found" });
 
   ticket.ready = true;
+
   const allReady = areAllExpectedPlayersReady();
 
   broadcast({ type: "players", players: getPlayersProgress() });
 
-  if (allReady) broadcast({ type: "all_ready" });
+  if (allReady) {
+    broadcast({
+      type: "all_ready",
+      expectedPlayers: expectedPlayersCount
+    });
+  }
 
   res.json({ ok: true, allReady });
 });
@@ -201,10 +221,8 @@ app.post("/api/bingo/:id", (req, res) => {
   const ticket = tickets[req.params.id];
   if (!ticket) return res.json({ winner: false });
 
-  const { marked } = req.body || {};
-  const validMarks = Array.isArray(marked) && marked.every(n => drawn.includes(n));
-  const fullMatch = ticket.nums.every(n => drawn.includes(n));
-  const winner = validMarks && fullMatch;
+  // Ελέγχουμε μόνο αν όλοι οι αριθμοί έχουν βγει
+  const winner = ticket.nums.every(n => drawn.includes(n));
 
   if (winner) {
     ticket.winner = true;
@@ -254,7 +272,6 @@ function broadcast(obj) {
   }
 }
 
-/* ===== START SERVER ===== */
 server.listen(PORT, () => {
   console.log("✅ Bingo server running on port", PORT);
 });
