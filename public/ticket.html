@@ -2,7 +2,7 @@
 <html lang="el">
 <head>
 <meta charset="UTF-8">
-<title>BINGO Κουπόνι παίκτη</title>
+<title>BINGO Κουπόνι Παίκτη</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -14,8 +14,6 @@ body{
   color:#000;
   text-align:center;
 }
-
-/* Κάρτα κουπονιού */
 #card{
   max-width:420px;
   margin:0 auto;
@@ -24,34 +22,24 @@ body{
   box-shadow:0 10px 30px rgba(0,0,0,0.25);
   padding:20px 16px 24px;
 }
-
-/* Τίτλος */
 #title{
   font-size:22px;
   font-weight:bold;
   margin-bottom:8px;
 }
-
-/* Όνομα παίκτη */
 #playerName{
   font-size:18px;
   margin-bottom:10px;
 }
-
-/* Ticket ID */
 #ticketIdLabel{
   font-size:13px;
   color:#555;
   margin-bottom:10px;
 }
-
-/* Κλήρωση / κατάσταση */
 #status{
   font-size:15px;
   margin:12px 0;
 }
-
-/* Πλέγμα αριθμών */
 #numsGrid{
   display:grid;
   grid-template-columns:repeat(5,1fr);
@@ -65,14 +53,13 @@ body{
   font-size:16px;
   font-weight:bold;
   box-shadow:0 2px 4px rgba(0,0,0,0.15);
+  cursor:pointer;
 }
 .numCell.marked{
   background:#4caf50;
   color:#fff;
   box-shadow:0 0 8px rgba(76,175,80,0.9);
 }
-
-/* Σειρά κουμπιών */
 #buttonsRow{
   margin-top:16px;
   display:flex;
@@ -80,8 +67,6 @@ body{
   gap:10px;
   justify-content:center;
 }
-
-/* Κουμπί "Είμαι έτοιμος" */
 .btn{
   padding:10px 16px;
   border-radius:20px;
@@ -98,31 +83,18 @@ body{
 #btnReady.ready-on{
   background:linear-gradient(135deg,#9e9e9e,#bdbdbd);
 }
-#btnReady:active{
-  transform:scale(0.95);
-}
-
-/* Κουμπί BINGO */
+#btnReady:active{transform:scale(0.95);}
 #btnBingo{
   background:linear-gradient(135deg,#d50000,#ff1744);
   color:#fff;
 }
-#btnBingo:active{
-  transform:scale(0.95);
-}
-#btnBingo:disabled{
-  background:#999;
-  cursor:not-allowed;
-}
-
-/* Μικρό info text */
+#btnBingo:active{transform:scale(0.95);}
+#btnBingo:disabled{background:#999; cursor:not-allowed;}
 #infoText{
   margin-top:10px;
   font-size:13px;
   color:#444;
 }
-
-/* Game over banner */
 #gameOverBanner{
   margin-top:12px;
   padding:8px;
@@ -132,38 +104,26 @@ body{
   color:#b71c1c;
   display:none;
 }
-
-/* Small top banner */
 #topBanner{
   font-size:13px;
   margin-bottom:10px;
   color:#222;
 }
-
-/* Responsive */
 @media (max-width:480px){
-  #card{
-    padding:18px 12px 22px;
-  }
-  .numCell{
-    font-size:14px;
-    padding:6px 0;
-  }
+  #card{padding:18px 12px 22px;}
+  .numCell{font-size:14px; padding:6px 0;}
 }
 </style>
 </head>
 
 <body>
-
-<div id="topBanner">BINGO Κουπόνι παίκτη</div>
+<div id="topBanner">BINGO Κουπόνι Παίκτη</div>
 
 <div id="card">
   <div id="title">Το κουπόνι σου</div>
   <div id="playerName"></div>
   <div id="ticketIdLabel"></div>
-
   <div id="status">Περιμένετε να ξεκινήσει το παιχνίδι…</div>
-
   <div id="numsGrid"></div>
 
   <div id="buttonsRow">
@@ -191,31 +151,30 @@ function getTicketIdFromUrl(){
   return params.get("ticketId");
 }
 
-/* ===== WebSocket για ενημέρωση gameOver (και ίσως στο μέλλον κι άλλα) ===== */
+/* ===== WebSocket ===== */
 const wsProtocol = location.protocol === "https:" ? "wss://" : "ws://";
 const ws = new WebSocket(wsProtocol + location.host);
 
 ws.onmessage = (msg) => {
   const data = JSON.parse(msg.data);
 
-  if (data.type === "gameover") {
+  if(data.type === "gameover"){
     gameOver = true;
     document.getElementById("btnBingo").disabled = true;
-    showGameOver("Το παιχνίδι ολοκληρώθηκε. Αν έκανες BINGO, θα το δεις στην οθόνη.");
+    showGameOver("Το παιχνίδι ολοκληρώθηκε.");
   }
 
-  if (data.type === "reset") {
+  if(data.type === "reset"){
     gameOver = false;
     document.getElementById("btnBingo").disabled = false;
     hideGameOver();
     document.getElementById("status").textContent = "Περιμένετε να ξεκινήσει το παιχνίδι…";
   }
 
-  if (data.type === "bingo" && data.id && data.id != ticketId && data.winner) {
-    // Κάποιος άλλος έκανε έγκυρο BINGO
+  if(data.type === "bingo" && data.id != ticketId && data.winner){
     gameOver = true;
     document.getElementById("btnBingo").disabled = true;
-    showGameOver("Άλλος παίκτης έκανε BINGO! Το παιχνίδι τελείωσε.");
+    showGameOver("Άλλος παίκτης έκανε BINGO!");
   }
 };
 
@@ -225,94 +184,79 @@ function showGameOver(msg){
   g.style.display = "block";
 }
 function hideGameOver(){
-  const g = document.getElementById("gameOverBanner");
-  g.style.display = "none";
+  document.getElementById("gameOverBanner").style.display = "none";
 }
 
-/* ===== Φόρτωση ticket ===== */
+/* ===== Load Ticket ===== */
 async function loadTicket(){
   ticketId = getTicketIdFromUrl();
-  if (!ticketId) {
-    alert("Δεν βρέθηκε ticketId στο URL.");
-    return;
-  }
+  if(!ticketId){ alert("Δεν βρέθηκε ticketId στο URL."); return; }
 
   const res = await fetch("/api/ticket/" + ticketId);
-  if (!res.ok) {
-    alert("Το κουπόνι δεν βρέθηκε.");
-    return;
-  }
+  if(!res.ok){ alert("Το κουπόνι δεν βρέθηκε."); return; }
 
   ticketData = await res.json();
   renderTicket();
 }
 
-/* ===== Εμφάνιση ticket ===== */
+/* ===== Render Ticket ===== */
 function renderTicket(){
-  document.getElementById("playerName").textContent =
-    ticketData.name ? ("Παίκτης: " + ticketData.name) : "Παίκτης " + ticketData.id;
-  document.getElementById("ticketIdLabel").textContent =
-    "Ticket ID: " + ticketData.id;
+  document.getElementById("playerName").textContent = ticketData.name ? ("Παίκτης: "+ticketData.name) : "Παίκτης "+ticketData.id;
+  document.getElementById("ticketIdLabel").textContent = "Ticket ID: "+ticketData.id;
 
   const grid = document.getElementById("numsGrid");
   grid.innerHTML = "";
-
   markedNumbers = [];
 
-  if (Array.isArray(ticketData.nums)) {
-    ticketData.nums.forEach(num => {
+  if(Array.isArray(ticketData.nums)){
+    ticketData.nums.forEach(num=>{
       const cell = document.createElement("div");
       cell.className = "numCell";
       cell.textContent = num;
       cell.dataset.num = num;
 
-      cell.addEventListener("click", () => {
+      cell.addEventListener("click", ()=>{
         toggleMark(num, cell);
       });
 
       grid.appendChild(cell);
     });
   }
-
-  // Αν στο μέλλον θες να βλέπει status από server για ready, εδώ μπορείς να κάνεις update.
 }
 
-/* Mark/unmark αριθμούς (τοπικά στο client) */
+/* ===== Mark/Unmark Numbers ===== */
 function toggleMark(num, cell){
-  if (gameOver) return;
+  if(gameOver) return;
 
   const idx = markedNumbers.indexOf(num);
-  if (idx === -1) {
+  if(idx === -1){
     markedNumbers.push(num);
     cell.classList.add("marked");
-  } else {
+  }else{
     markedNumbers.splice(idx,1);
     cell.classList.remove("marked");
   }
 
-  if (markedNumbers.length > 0) {
-    document.getElementById("status").textContent =
-      "Έχεις μαρκάρει " + markedNumbers.length + " αριθμούς.";
-  } else {
-    document.getElementById("status").textContent =
-      "Περιμένετε να ξεκινήσει το παιχνίδι…";
+  const btnBingo = document.getElementById("btnBingo");
+  btnBingo.disabled = markedNumbers.length !== ticketData.nums.length;
+
+  if(markedNumbers.length > 0){
+    document.getElementById("status").textContent = "Έχεις μαρκάρει "+markedNumbers.length+" αριθμούς.";
+  }else{
+    document.getElementById("status").textContent = "Περιμένετε να ξεκινήσει το παιχνίδι…";
   }
 }
 
 /* ===== READY BUTTON ===== */
 let hasSentReady = false;
-
 async function sendReady(){
-  if (hasSentReady || !ticketId) return;
+  if(hasSentReady || !ticketId) return;
 
   const btn = document.getElementById("btnReady");
 
-  try {
-    const res = await fetch("/api/ready/" + ticketId, { method: "POST" });
-    if (!res.ok) {
-      alert("Πρόβλημα με την δήλωση ετοιμότητας.");
-      return;
-    }
+  try{
+    const res = await fetch("/api/ready/" + ticketId, { method:"POST" });
+    if(!res.ok){ alert("Πρόβλημα με την δήλωση ετοιμότητας."); return; }
 
     const data = await res.json();
     hasSentReady = true;
@@ -320,26 +264,17 @@ async function sendReady(){
     btn.textContent = "✅ Δήλωσες ότι είσαι έτοιμος";
     btn.disabled = true;
 
-    if (data.allReady) {
-      // Προαιρετικό μήνυμα – η TV αναλαμβάνει το countdown
-      document.getElementById("status").textContent =
-        "Όλοι οι παίκτες είναι έτοιμοι! Περιμένετε την έναρξη…";
-    } else {
-      document.getElementById("status").textContent =
-        "Περίμενε τους υπόλοιπους παίκτες να δηλώσουν ότι είναι έτοιμοι…";
-    }
-  } catch (e) {
-    alert("Σφάλμα στην επικοινωνία με τον server.");
-  }
+    document.getElementById("status").textContent = data.allReady ? "Όλοι οι παίκτες είναι έτοιμοι! Περιμένετε…" : "Περίμενε τους υπόλοιπους παίκτες…";
+
+  }catch(e){ alert("Σφάλμα στην επικοινωνία με τον server."); }
 }
 
 /* ===== BINGO BUTTON ===== */
 async function callBingo(){
-  if (!ticketId || gameOver) return;
+  if(!ticketId || gameOver) return;
+  if(!confirm("Είσαι σίγουρος ότι έχεις BINGO;")) return;
 
-  if (!confirm("Είσαι σίγουρος ότι έχεις BINGO;")) return;
-
-  try {
+  try{
     const res = await fetch("/api/bingo/" + ticketId, {
       method:"POST",
       headers:{"Content-Type":"application/json"},
@@ -347,19 +282,17 @@ async function callBingo(){
     });
     const data = await res.json();
 
-    if (data.winner) {
+    if(data.winner){
       gameOver = true;
       document.getElementById("btnBingo").disabled = true;
-      showGameOver("Συγχαρητήρια! Έκανες BINGO! Ο παρουσιαστής θα το δει στην οθόνη.");
-    } else {
+      showGameOver("Συγχαρητήρια! Έκανες BINGO!");
+    }else{
       alert("Το BINGO που δήλωσες δεν είναι έγκυρο.");
     }
-  } catch(e) {
-    alert("Σφάλμα στην επικοινωνία με τον server.");
-  }
+  }catch(e){ alert("Σφάλμα στην επικοινωνία με τον server."); }
 }
 
-/* === Init === */
+/* ===== Init ===== */
 loadTicket();
 </script>
 </body>
