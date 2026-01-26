@@ -32,29 +32,36 @@ h1{ margin-top:15px; }
   transition: transform 0.3s ease;
   box-shadow:0 10px 40px rgba(0,0,0,0.3);
 }
-#number.zoom { transform: scale(1.25); }
+#number.zoom{ transform:scale(1.25); }
 
-/* ===== SIDE FADED NUMBERS (ΠΡΟΣΘΗΚΗ) ===== */
+/* ===== SIDE NUMBERS (ΤΕΛΙΚΟ) ===== */
 .bingoSide{
   position:fixed;
   top:50%;
   transform:translateY(-50%);
-  width:180px;
+  height:400px;              /* ΙΔΙΟ ΥΨΟΣ ΜΕ ΜΠΑΛΑ */
+  width:260px;
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:6px;
-  opacity:0.25;
+  grid-template-columns:repeat(4,1fr); /* 4 ΣΤΗΛΕΣ */
+  row-gap:14px;
+  opacity:0.22;
   pointer-events:none;
   font-weight:bold;
 }
-.bingoSide.left{ left:20px; }
-.bingoSide.right{ right:20px; }
+
+.bingoSide.left{ left:30px; }
+.bingoSide.right{ right:30px; }
+
 .bingoSide span{
   text-align:center;
-  font-size:18px;
-  transition:opacity 0.3s ease;
+  font-size:34px;            /* TV SIZE */
+  line-height:1;
+  transition:opacity 0.25s ease;
 }
-.bingoSide span.drawn{ opacity:1; }
+
+.bingoSide span.drawn{
+  opacity:1;
+}
 
 /* ===== CONTROLS ===== */
 .controls{
@@ -68,15 +75,6 @@ h1{ margin-top:15px; }
   backdrop-filter:blur(12px);
   border-radius:30px;
   box-shadow:0 8px 25px rgba(0,0,0,0.25);
-}
-.controls button{
-  padding:14px 28px;
-  font-size:22px;
-  border:none;
-  border-radius:50px;
-  cursor:pointer;
-  font-weight:bold;
-  color:white;
 }
 
 /* Drawn grid */
@@ -114,9 +112,9 @@ audio{ display:none; }
 <div class="bingoSide right" id="bingoRight"></div>
 
 <div class="controls">
-  <button onclick="startAuto()">▶️ AUTO</button>
-  <button onclick="stopAuto()">⏹️ STOP</button>
-  <button onclick="resetGame()">🔄 RESET</button>
+  <button id="btnAuto" onclick="startAuto()">▶️ AUTO</button>
+  <button id="btnStop" onclick="stopAuto()">⏹️ STOP</button>
+  <button id="btnReset" onclick="resetGame()">🔄 RESET</button>
 </div>
 
 <div id="drawn"></div>
@@ -141,6 +139,7 @@ for(let i=38;i<=75;i++){
   s.dataset.num=i;
   bingoRight.appendChild(s);
 }
+
 function markSideNumber(n){
   const el=document.querySelector(`.bingoSide span[data-num="${n}"]`);
   if(el) el.classList.add("drawn");
@@ -156,7 +155,8 @@ ws.onmessage=(msg)=>{
   if(data.type==="reset"){
     document.getElementById("number").innerText="–";
     document.getElementById("drawn").innerHTML="";
-    document.querySelectorAll(".bingoSide span").forEach(s=>s.classList.remove("drawn"));
+    document.querySelectorAll(".bingoSide span")
+      .forEach(s=>s.classList.remove("drawn"));
   }
 };
 
