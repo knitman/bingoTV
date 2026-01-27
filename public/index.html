@@ -4,7 +4,34 @@
 <meta charset="UTF-8">
 <title>BINGO TV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js">
+/* ===== ADD: SIDE NUMBERS SAFE INIT ===== */
+document.addEventListener("DOMContentLoaded", () => {
+  const bingoLeft = document.getElementById("bingoLeft");
+  const bingoRight = document.getElementById("bingoRight");
+  if (!bingoLeft || !bingoRight) return;
+
+  for (let i = 1; i <= 37; i++) {
+    const s = document.createElement("span");
+    s.textContent = i;
+    s.dataset.num = i;
+    bingoLeft.appendChild(s);
+  }
+  for (let i = 38; i <= 75; i++) {
+    const s = document.createElement("span");
+    s.textContent = i;
+    s.dataset.num = i;
+    bingoRight.appendChild(s);
+  }
+
+  window.markSideNumber = function(n){
+    const el = document.querySelector(`.bingoSide span[data-num="${n}"]`);
+    if (el) el.classList.add("drawn");
+  };
+});
+/* ===== END ADD ===== */
+
+</script>
 
 <style>
 body{
@@ -529,30 +556,6 @@ audio { display:none; }
 </div>
 
 <script>
-
-// ===== ADD: SIDE NUMBERS INIT =====
-const bingoLeft = document.getElementById("bingoLeft");
-const bingoRight = document.getElementById("bingoRight");
-
-for (let i = 1; i <= 37; i++) {
-  const s = document.createElement("span");
-  s.textContent = i;
-  s.dataset.num = i;
-  bingoLeft.appendChild(s);
-}
-for (let i = 38; i <= 75; i++) {
-  const s = document.createElement("span");
-  s.textContent = i;
-  s.dataset.num = i;
-  bingoRight.appendChild(s);
-}
-
-function markSideNumber(n){
-  const el = document.querySelector(`.bingoSide span[data-num="${n}"]`);
-  if (el) el.classList.add("drawn");
-}
-// ===== END ADD =====
-
 let auto = null;
 let gameOver = false;
 let lastNearIds = new Set();
@@ -735,7 +738,7 @@ function show(n, arr){
 
   const d = document.getElementById("drawn");
   d.innerHTML = "";
-  markSideNumber(n);
+  if (window.markSideNumber) window.markSideNumber(n);
 
   arr.forEach(x=>{
     const b=document.createElement("div");
@@ -947,6 +950,33 @@ function stopCountdown(forceHide){
   }
   updateControls();
 }
+
+/* ===== ADD: SIDE NUMBERS SAFE INIT ===== */
+document.addEventListener("DOMContentLoaded", () => {
+  const bingoLeft = document.getElementById("bingoLeft");
+  const bingoRight = document.getElementById("bingoRight");
+  if (!bingoLeft || !bingoRight) return;
+
+  for (let i = 1; i <= 37; i++) {
+    const s = document.createElement("span");
+    s.textContent = i;
+    s.dataset.num = i;
+    bingoLeft.appendChild(s);
+  }
+  for (let i = 38; i <= 75; i++) {
+    const s = document.createElement("span");
+    s.textContent = i;
+    s.dataset.num = i;
+    bingoRight.appendChild(s);
+  }
+
+  window.markSideNumber = function(n){
+    const el = document.querySelector(`.bingoSide span[data-num="${n}"]`);
+    if (el) el.classList.add("drawn");
+  };
+});
+/* ===== END ADD ===== */
+
 </script>
 
 
