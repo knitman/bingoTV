@@ -36,8 +36,22 @@ window.show = function(n){
     el.classList.add('drawn');
     el.classList.add('last');
   }
+  speakNumber(n);
 };
 /* ===== END OVERRIDE ===== */
+
+
+/* ===== TTS GREEK NUMBER ===== */
+function speakNumber(n){
+  if(!window.speechSynthesis) return;
+  const utter = new SpeechSynthesisUtterance(String(n));
+  utter.lang = "el-GR";
+  utter.rate = 0.95;
+  utter.pitch = 1;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utter);
+}
+/* ===== END TTS ===== */
 
 </script>
 
@@ -987,8 +1001,22 @@ window.show = function(n){
     el.classList.add('drawn');
     el.classList.add('last');
   }
+  speakNumber(n);
 };
 /* ===== END OVERRIDE ===== */
+
+
+/* ===== TTS GREEK NUMBER ===== */
+function speakNumber(n){
+  if(!window.speechSynthesis) return;
+  const utter = new SpeechSynthesisUtterance(String(n));
+  utter.lang = "el-GR";
+  utter.rate = 0.95;
+  utter.pitch = 1;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utter);
+}
+/* ===== END TTS ===== */
 
 </script>
 
