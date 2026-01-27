@@ -5,10 +5,10 @@
 <title>BINGO TV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js">
-/* ===== INIT FULL DRAWN GRID ===== */
+/* ===== INIT 1–75 GRID ONCE ===== */
 function initDrawnGrid(){
-  const d = document.getElementById("drawn");
-  d.innerHTML = "";
+  const d=document.getElementById("drawn");
+  d.innerHTML="";
   for(let i=1;i<=75;i++){
     const b=document.createElement("div");
     b.className="ball";
@@ -17,7 +17,8 @@ function initDrawnGrid(){
     d.appendChild(b);
   }
 }
-/* ===== END INIT FULL DRAWN GRID ===== */
+window.addEventListener("load", initDrawnGrid);
+/* ===== END INIT ===== */
 
 </script>
 
@@ -157,15 +158,15 @@ h1{
 
 /* Μικρές μπάλες 4K */
 .ball{
-  width:64px;
-  height:64px;
+  width:90px;
+  height:90px;
   border-radius:50%;
   background:white;
   display:flex;
   align-items:center;
   justify-content:center;
   font-weight:bold;
-  font-size:22px;
+  font-size:32px;
   box-shadow:0 5px 15px rgba(0,0,0,0.2);
 }
 
@@ -440,25 +441,30 @@ audio { display:none; }
   }
 }
 
-/* ===== DRAWN GRID FULL (1–75 PREPOPULATED) ===== */
+/* ===== FULL GRID STATE COLORS ===== */
 #drawn .ball {
+  width:64px;
+  height:64px;
+  font-size:22px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   color: rgba(255,255,255,0.35);
   background: rgba(255,255,255,0.25);
 }
 
-
 #drawn .ball.drawn {
-  color: #000;
-  background: #ffb300; /* παλιοί αριθμοί */
+  background:#ffb300;
+  color:#000;
 }
 
 #drawn .ball.last {
-  background: #ff1744; /* τελευταίος αριθμός */
-  color: #fff;
-  box-shadow: 0 0 15px rgba(255,23,68,0.8);
+  background:#ff1744;
+  color:#fff;
+  box-shadow:0 0 15px rgba(255,23,68,.8);
 }
-
-/* ===== END DRAWN GRID FULL ===== */
+/* ===== END ===== */
 
 </style>
 </head>
@@ -540,7 +546,6 @@ audio { display:none; }
 
 <script>
 let auto = null;
-initDrawnGrid();
 let gameOver = false;
 let lastNearIds = new Set();
 let expectedPlayersCount = 0;
@@ -573,7 +578,7 @@ ws.onmessage = (msg) => {
       show(last, data.drawn);
     }
     if (data.type === "newgame") {
-  numbersCleared();
+  numbersCleared(){ initDrawnGrid(); };
   renderPlayers([]);
   stopAuto();
   stopCountdown(true);
@@ -618,7 +623,7 @@ ws.onmessage = (msg) => {
 
   if (data.type === "reset") {
     gameOver = false;
-    numbersCleared();
+    numbersCleared(){ initDrawnGrid(); };
     renderPlayers([]);
     stopCountdown(true);
   }
@@ -631,9 +636,7 @@ ws.onmessage = (msg) => {
   }
 };
 
-function numbersCleared(){
-  initDrawnGrid();
-
+function numbersCleared(){ initDrawnGrid(); }{
   document.getElementById("drawn").innerHTML = "";
   document.getElementById("number").innerText = "–";
 }
@@ -693,7 +696,7 @@ async function newGame(){
   const data = await res.json();
 
   if (data.ok) {
-    numbersCleared();
+    numbersCleared(){ initDrawnGrid(); };
     renderPlayers([]);
     stopAuto();
     stopCountdown(true);
@@ -713,25 +716,22 @@ function resetGame(){
 }
 
 /* ===== UPDATE MAIN NUMBER + DRAWN LIST ===== */
-function show(n, arr){
-  const num = document.getElementById("number");
-  num.innerText = n;
-
+function show(n){
+  const num=document.getElementById("number");
+  num.innerText=n;
   num.classList.add("zoom");
-  setTimeout(() => num.classList.remove("zoom"), 300);
+  setTimeout(()=>num.classList.remove("zoom"),300);
 
-  document.getElementById("soundNumber").play();
+  document.querySelectorAll('#drawn .ball.last')
+    .forEach(b=>b.classList.remove('last'));
 
-  const d=document.getElementById("drawn");
-  const el=d.querySelector('.ball[data-num="'+n+'"]');
-  document.querySelectorAll('#drawn .ball.last').forEach(b=>b.classList.remove('last'));
-  if(el){ el.classList.add('drawn'); el.classList.add('last'); }
-  arr.forEach(x=>{
-    const b=document.createElement("div");
-    b.className="ball"; 
-    b.innerText=x;
-    d.appendChild(b);
-  });
+  const el=document.querySelector('#drawn .ball[data-num="'+n+'"]');
+  if(el){
+    el.classList.add('drawn');
+    el.classList.add('last');
+  }
+}
+);
 }
 
 /* ===== PLAYERS TABLE + NEAR-BINGO + READY ===== */
@@ -937,10 +937,10 @@ function stopCountdown(forceHide){
   updateControls();
 }
 
-/* ===== INIT FULL DRAWN GRID ===== */
+/* ===== INIT 1–75 GRID ONCE ===== */
 function initDrawnGrid(){
-  const d = document.getElementById("drawn");
-  d.innerHTML = "";
+  const d=document.getElementById("drawn");
+  d.innerHTML="";
   for(let i=1;i<=75;i++){
     const b=document.createElement("div");
     b.className="ball";
@@ -949,7 +949,8 @@ function initDrawnGrid(){
     d.appendChild(b);
   }
 }
-/* ===== END INIT FULL DRAWN GRID ===== */
+window.addEventListener("load", initDrawnGrid);
+/* ===== END INIT ===== */
 
 </script>
 
