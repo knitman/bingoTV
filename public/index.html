@@ -4,7 +4,34 @@
 <meta charset="UTF-8">
 <title>BINGO TV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js">
+/* ===== SIDE NUMBERS INIT (ISOLATED) ===== */
+(function(){
+  const left = document.getElementById("bingoLeft");
+  const right = document.getElementById("bingoRight");
+  if (!left || !right) return;
+
+  for (let i = 1; i <= 37; i++) {
+    const s = document.createElement("span");
+    s.textContent = i;
+    s.dataset.num = i;
+    left.appendChild(s);
+  }
+  for (let i = 38; i <= 75; i++) {
+    const s = document.createElement("span");
+    s.textContent = i;
+    s.dataset.num = i;
+    right.appendChild(s);
+  }
+
+  window.markSideNumber = function(n){
+    const el = document.querySelector('.bingoSide span[data-num="' + n + '"]');
+    if (el) el.classList.add("drawn");
+  };
+})();
+/* ===== END SIDE NUMBERS INIT ===== */
+
+</script>
 
 <style>
 body{
@@ -424,6 +451,34 @@ audio { display:none; }
     padding:10px 20px;
   }
 }
+
+/* ===== SIDE NUMBERS (SAFE, VISIBLE, NON-INTRUSIVE) ===== */
+.bingoSide {
+  position: fixed;
+  top: 260px;
+  width: 360px;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 10px;
+  opacity: 0.25;
+  pointer-events: none;
+  font-weight: bold;
+  z-index: 5;
+}
+.bingoSide.left { left: 10px; }
+.bingoSide.right { right: 10px; }
+
+.bingoSide span {
+  font-size: 28px;
+  text-align: center;
+  transition: opacity 0.25s ease;
+}
+
+.bingoSide span.drawn {
+  opacity: 1;
+}
+/* ===== END SIDE NUMBERS ===== */
+
 </style>
 </head>
 
@@ -439,7 +494,6 @@ audio { display:none; }
   </button>
 </div>
 
-<div id="numberWrap" style="position:relative; width:400px; height:400px; margin:20px auto;">
 <div id="number">–</div>
 
 <!-- Ήχοι -->
@@ -686,6 +740,7 @@ function show(n, arr){
 
   const d = document.getElementById("drawn");
   d.innerHTML = "";
+  if (window.markSideNumber) window.markSideNumber(n);
   arr.forEach(x=>{
     const b=document.createElement("div");
     b.className="ball"; 
@@ -896,7 +951,39 @@ function stopCountdown(forceHide){
   }
   updateControls();
 }
+
+/* ===== SIDE NUMBERS INIT (ISOLATED) ===== */
+(function(){
+  const left = document.getElementById("bingoLeft");
+  const right = document.getElementById("bingoRight");
+  if (!left || !right) return;
+
+  for (let i = 1; i <= 37; i++) {
+    const s = document.createElement("span");
+    s.textContent = i;
+    s.dataset.num = i;
+    left.appendChild(s);
+  }
+  for (let i = 38; i <= 75; i++) {
+    const s = document.createElement("span");
+    s.textContent = i;
+    s.dataset.num = i;
+    right.appendChild(s);
+  }
+
+  window.markSideNumber = function(n){
+    const el = document.querySelector('.bingoSide span[data-num="' + n + '"]');
+    if (el) el.classList.add("drawn");
+  };
+})();
+/* ===== END SIDE NUMBERS INIT ===== */
+
 </script>
+
+
+<!-- SIDE NUMBERS -->
+<div class="bingoSide left" id="bingoLeft"></div>
+<div class="bingoSide right" id="bingoRight"></div>
 
 </body>
 
