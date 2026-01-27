@@ -4,34 +4,7 @@
 <meta charset="UTF-8">
 <title>BINGO TV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js">
-/* ===== ADD: SIDE NUMBERS SAFE INIT ===== */
-document.addEventListener("DOMContentLoaded", () => {
-  const bingoLeft = document.getElementById("bingoLeft");
-  const bingoRight = document.getElementById("bingoRight");
-  if (!bingoLeft || !bingoRight) return;
-
-  for (let i = 1; i <= 37; i++) {
-    const s = document.createElement("span");
-    s.textContent = i;
-    s.dataset.num = i;
-    bingoLeft.appendChild(s);
-  }
-  for (let i = 38; i <= 75; i++) {
-    const s = document.createElement("span");
-    s.textContent = i;
-    s.dataset.num = i;
-    bingoRight.appendChild(s);
-  }
-
-  window.markSideNumber = function(n){
-    const el = document.querySelector(`.bingoSide span[data-num="${n}"]`);
-    if (el) el.classList.add("drawn");
-  };
-});
-/* ===== END ADD ===== */
-
-</script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <style>
 body{
@@ -451,32 +424,6 @@ audio { display:none; }
     padding:10px 20px;
   }
 }
-
-/* ===== ADD: SIDE NUMBERS (8 COLUMNS) ===== */
-.bingoSide{
-  position:fixed;
-  top:50%;
-  transform:translateY(-60%);
-  height:400px;
-  width:360px;
-  display:grid;
-  grid-template-columns:repeat(8,1fr);
-  row-gap:14px;
-  opacity:0.22;
-  pointer-events:none;
-  font-weight:bold;
-}
-.bingoSide.left{ left:20px; }
-.bingoSide.right{ right:20px; }
-.bingoSide span{
-  text-align:center;
-  font-size:30px;
-  line-height:1;
-  transition:opacity 0.25s ease;
-}
-.bingoSide span.drawn{ opacity:1; }
-/* ===== END ADD ===== */
-
 </style>
 </head>
 
@@ -738,8 +685,6 @@ function show(n, arr){
 
   const d = document.getElementById("drawn");
   d.innerHTML = "";
-  if (window.markSideNumber) window.markSideNumber(n);
-
   arr.forEach(x=>{
     const b=document.createElement("div");
     b.className="ball"; 
@@ -950,40 +895,7 @@ function stopCountdown(forceHide){
   }
   updateControls();
 }
-
-/* ===== ADD: SIDE NUMBERS SAFE INIT ===== */
-document.addEventListener("DOMContentLoaded", () => {
-  const bingoLeft = document.getElementById("bingoLeft");
-  const bingoRight = document.getElementById("bingoRight");
-  if (!bingoLeft || !bingoRight) return;
-
-  for (let i = 1; i <= 37; i++) {
-    const s = document.createElement("span");
-    s.textContent = i;
-    s.dataset.num = i;
-    bingoLeft.appendChild(s);
-  }
-  for (let i = 38; i <= 75; i++) {
-    const s = document.createElement("span");
-    s.textContent = i;
-    s.dataset.num = i;
-    bingoRight.appendChild(s);
-  }
-
-  window.markSideNumber = function(n){
-    const el = document.querySelector(`.bingoSide span[data-num="${n}"]`);
-    if (el) el.classList.add("drawn");
-  };
-});
-/* ===== END ADD ===== */
-
 </script>
-
-
-<!-- ===== ADD: SIDE NUMBERS ===== -->
-<div class="bingoSide left" id="bingoLeft"></div>
-<div class="bingoSide right" id="bingoRight"></div>
-<!-- ===== END ADD ===== -->
 
 </body>
 
