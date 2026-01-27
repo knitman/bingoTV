@@ -157,15 +157,15 @@ h1{
 
 /* Μικρές μπάλες 4K */
 .ball{
-  width:90px;
-  height:90px;
+  width:64px;
+  height:64px;
   border-radius:50%;
   background:white;
   display:flex;
   align-items:center;
   justify-content:center;
   font-weight:bold;
-  font-size:32px;
+  font-size:22px;
   box-shadow:0 5px 15px rgba(0,0,0,0.2);
 }
 
@@ -446,10 +446,18 @@ audio { display:none; }
   background: rgba(255,255,255,0.25);
 }
 
+
 #drawn .ball.drawn {
   color: #000;
-  background: #ff1744;
+  background: #ffb300; /* παλιοί αριθμοί */
 }
+
+#drawn .ball.last {
+  background: #ff1744; /* τελευταίος αριθμός */
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255,23,68,0.8);
+}
+
 /* ===== END DRAWN GRID FULL ===== */
 
 </style>
@@ -716,7 +724,8 @@ function show(n, arr){
 
   const d=document.getElementById("drawn");
   const el=d.querySelector('.ball[data-num="'+n+'"]');
-  if(el) el.classList.add('drawn');
+  document.querySelectorAll('#drawn .ball.last').forEach(b=>b.classList.remove('last'));
+  if(el){ el.classList.add('drawn'); el.classList.add('last'); }
   arr.forEach(x=>{
     const b=document.createElement("div");
     b.className="ball"; 
