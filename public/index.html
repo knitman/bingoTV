@@ -5,11 +5,11 @@
 <title>BINGO TV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js">
-/* ===== INIT FULL BINGO BOARD (NON-INVASIVE) ===== */
-(function(){
-  const d = document.getElementById("drawn");
-  if(!d || d.children.length) return;
-
+/* ===== FULL GRID OVERRIDE (SAFE) ===== */
+function initDrawnGrid(){
+  const d=document.getElementById("drawn");
+  if(!d) return;
+  d.innerHTML="";
   for(let i=1;i<=75;i++){
     const b=document.createElement("div");
     b.className="ball";
@@ -17,24 +17,27 @@
     b.innerText=i;
     d.appendChild(b);
   }
+}
 
-  // Observe class changes made by existing logic
-  const obs = new MutationObserver(() => {
-    const balls = d.querySelectorAll(".ball");
-    balls.forEach(b => {
-      if(b.innerText){
-        const n = b.innerText.trim();
-        const target = d.querySelector('.ball[data-num="'+n+'"]');
-        if(target && b !== target){
-          target.className = b.className; // sync state
-        }
-      }
-    });
-  });
+window.addEventListener("load", initDrawnGrid);
 
-  obs.observe(d, { childList:true, subtree:true });
-})();
-/* ===== END INIT ===== */
+// override show without touching ws / coupons
+window.show = function(n){
+  const num=document.getElementById("number");
+  num.innerText=n;
+  num.classList.add("zoom");
+  setTimeout(()=>num.classList.remove("zoom"),300);
+
+  document.querySelectorAll('#drawn .ball.last')
+    .forEach(b=>b.classList.remove('last'));
+
+  const el=document.querySelector('#drawn .ball[data-num="'+n+'"]');
+  if(el){
+    el.classList.add('drawn');
+    el.classList.add('last');
+  }
+};
+/* ===== END OVERRIDE ===== */
 
 </script>
 
@@ -457,41 +460,27 @@ audio { display:none; }
   }
 }
 
-/* ===== BINGO FULL BOARD (SAFE OVERLAY) ===== */
-#drawn {
+/* ===== FULL BINGO BOARD ===== */
+#drawn{
   display:flex;
   flex-wrap:wrap;
+  justify-content:center;
 }
-
-#drawn .ball {
-  width:64px;
-  height:64px;
+#drawn .ball{
+  width:64px;height:64px;
   font-size:22px;
   border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
-  margin:5px;
-  color: rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.25);
+  margin:4px;
+  color:rgba(255,255,255,.35);
+  background:rgba(255,255,255,.25);
 }
-
-/* old drawn numbers */
-#drawn .ball.drawn {
-  background:#ffb300;
-  color:#000;
-}
-
-/* last drawn */
-#drawn .ball.last {
-  background:#ff1744;
-  color:#fff;
-  box-shadow:0 0 15px rgba(255,23,68,.8);
-}
-
-/* HARD SAFETY: hide any balls added after the first 75 */
-#drawn .ball:nth-child(n+76) {
-  display:none !important;
+#drawn .ball.drawn{background:#ffb300;color:#000}
+#drawn .ball.last{
+  background:#ff1744;color:#fff;
+  box-shadow:0 0 15px rgba(255,23,68,.8)
 }
 /* ===== END ===== */
 
@@ -967,11 +956,11 @@ function stopCountdown(forceHide){
   updateControls();
 }
 
-/* ===== INIT FULL BINGO BOARD (NON-INVASIVE) ===== */
-(function(){
-  const d = document.getElementById("drawn");
-  if(!d || d.children.length) return;
-
+/* ===== FULL GRID OVERRIDE (SAFE) ===== */
+function initDrawnGrid(){
+  const d=document.getElementById("drawn");
+  if(!d) return;
+  d.innerHTML="";
   for(let i=1;i<=75;i++){
     const b=document.createElement("div");
     b.className="ball";
@@ -979,24 +968,27 @@ function stopCountdown(forceHide){
     b.innerText=i;
     d.appendChild(b);
   }
+}
 
-  // Observe class changes made by existing logic
-  const obs = new MutationObserver(() => {
-    const balls = d.querySelectorAll(".ball");
-    balls.forEach(b => {
-      if(b.innerText){
-        const n = b.innerText.trim();
-        const target = d.querySelector('.ball[data-num="'+n+'"]');
-        if(target && b !== target){
-          target.className = b.className; // sync state
-        }
-      }
-    });
-  });
+window.addEventListener("load", initDrawnGrid);
 
-  obs.observe(d, { childList:true, subtree:true });
-})();
-/* ===== END INIT ===== */
+// override show without touching ws / coupons
+window.show = function(n){
+  const num=document.getElementById("number");
+  num.innerText=n;
+  num.classList.add("zoom");
+  setTimeout(()=>num.classList.remove("zoom"),300);
+
+  document.querySelectorAll('#drawn .ball.last')
+    .forEach(b=>b.classList.remove('last'));
+
+  const el=document.querySelector('#drawn .ball[data-num="'+n+'"]');
+  if(el){
+    el.classList.add('drawn');
+    el.classList.add('last');
+  }
+};
+/* ===== END OVERRIDE ===== */
 
 </script>
 
