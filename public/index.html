@@ -5,10 +5,11 @@
 <title>BINGO TV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js">
-/* ===== INIT 1–75 GRID ONCE ===== */
-function initDrawnGrid(){
-  const d=document.getElementById("drawn");
-  d.innerHTML="";
+/* ===== INIT FULL BINGO BOARD (NON-INVASIVE) ===== */
+(function(){
+  const d = document.getElementById("drawn");
+  if(!d || d.children.length) return;
+
   for(let i=1;i<=75;i++){
     const b=document.createElement("div");
     b.className="ball";
@@ -16,8 +17,23 @@ function initDrawnGrid(){
     b.innerText=i;
     d.appendChild(b);
   }
-}
-window.addEventListener("load", initDrawnGrid);
+
+  // Observe class changes made by existing logic
+  const obs = new MutationObserver(() => {
+    const balls = d.querySelectorAll(".ball");
+    balls.forEach(b => {
+      if(b.innerText){
+        const n = b.innerText.trim();
+        const target = d.querySelector('.ball[data-num="'+n+'"]');
+        if(target && b !== target){
+          target.className = b.className; // sync state
+        }
+      }
+    });
+  });
+
+  obs.observe(d, { childList:true, subtree:true });
+})();
 /* ===== END INIT ===== */
 
 </script>
@@ -441,7 +457,12 @@ audio { display:none; }
   }
 }
 
-/* ===== FULL GRID STATE COLORS ===== */
+/* ===== BINGO FULL BOARD (SAFE OVERLAY) ===== */
+#drawn {
+  display:flex;
+  flex-wrap:wrap;
+}
+
 #drawn .ball {
   width:64px;
   height:64px;
@@ -450,19 +471,27 @@ audio { display:none; }
   display:flex;
   align-items:center;
   justify-content:center;
+  margin:5px;
   color: rgba(255,255,255,0.35);
   background: rgba(255,255,255,0.25);
 }
 
+/* old drawn numbers */
 #drawn .ball.drawn {
   background:#ffb300;
   color:#000;
 }
 
+/* last drawn */
 #drawn .ball.last {
   background:#ff1744;
   color:#fff;
   box-shadow:0 0 15px rgba(255,23,68,.8);
+}
+
+/* HARD SAFETY: hide any balls added after the first 75 */
+#drawn .ball:nth-child(n+76) {
+  display:none !important;
 }
 /* ===== END ===== */
 
@@ -578,7 +607,7 @@ ws.onmessage = (msg) => {
       show(last, data.drawn);
     }
     if (data.type === "newgame") {
-  numbersCleared(){ initDrawnGrid(); };
+  numbersCleared();
   renderPlayers([]);
   stopAuto();
   stopCountdown(true);
@@ -623,7 +652,7 @@ ws.onmessage = (msg) => {
 
   if (data.type === "reset") {
     gameOver = false;
-    numbersCleared(){ initDrawnGrid(); };
+    numbersCleared();
     renderPlayers([]);
     stopCountdown(true);
   }
@@ -636,7 +665,7 @@ ws.onmessage = (msg) => {
   }
 };
 
-function numbersCleared(){ initDrawnGrid(); }{
+function numbersCleared(){
   document.getElementById("drawn").innerHTML = "";
   document.getElementById("number").innerText = "–";
 }
@@ -696,7 +725,7 @@ async function newGame(){
   const data = await res.json();
 
   if (data.ok) {
-    numbersCleared(){ initDrawnGrid(); };
+    numbersCleared();
     renderPlayers([]);
     stopAuto();
     stopCountdown(true);
@@ -716,22 +745,23 @@ function resetGame(){
 }
 
 /* ===== UPDATE MAIN NUMBER + DRAWN LIST ===== */
-function show(n){
-  const num=document.getElementById("number");
-  num.innerText=n;
+function show(n, arr){
+  const num = document.getElementById("number");
+  num.innerText = n;
+
   num.classList.add("zoom");
-  setTimeout(()=>num.classList.remove("zoom"),300);
+  setTimeout(() => num.classList.remove("zoom"), 300);
 
-  document.querySelectorAll('#drawn .ball.last')
-    .forEach(b=>b.classList.remove('last'));
+  document.getElementById("soundNumber").play();
 
-  const el=document.querySelector('#drawn .ball[data-num="'+n+'"]');
-  if(el){
-    el.classList.add('drawn');
-    el.classList.add('last');
-  }
-}
-);
+  const d = document.getElementById("drawn");
+  d.innerHTML = "";
+  arr.forEach(x=>{
+    const b=document.createElement("div");
+    b.className="ball"; 
+    b.innerText=x;
+    d.appendChild(b);
+  });
 }
 
 /* ===== PLAYERS TABLE + NEAR-BINGO + READY ===== */
@@ -937,10 +967,11 @@ function stopCountdown(forceHide){
   updateControls();
 }
 
-/* ===== INIT 1–75 GRID ONCE ===== */
-function initDrawnGrid(){
-  const d=document.getElementById("drawn");
-  d.innerHTML="";
+/* ===== INIT FULL BINGO BOARD (NON-INVASIVE) ===== */
+(function(){
+  const d = document.getElementById("drawn");
+  if(!d || d.children.length) return;
+
   for(let i=1;i<=75;i++){
     const b=document.createElement("div");
     b.className="ball";
@@ -948,8 +979,23 @@ function initDrawnGrid(){
     b.innerText=i;
     d.appendChild(b);
   }
-}
-window.addEventListener("load", initDrawnGrid);
+
+  // Observe class changes made by existing logic
+  const obs = new MutationObserver(() => {
+    const balls = d.querySelectorAll(".ball");
+    balls.forEach(b => {
+      if(b.innerText){
+        const n = b.innerText.trim();
+        const target = d.querySelector('.ball[data-num="'+n+'"]');
+        if(target && b !== target){
+          target.className = b.className; // sync state
+        }
+      }
+    });
+  });
+
+  obs.observe(d, { childList:true, subtree:true });
+})();
 /* ===== END INIT ===== */
 
 </script>
