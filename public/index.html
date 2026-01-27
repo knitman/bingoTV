@@ -5,31 +5,19 @@
 <title>BINGO TV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js">
-/* ===== SIDE NUMBERS INIT ===== */
-(function(){
-  const L = document.getElementById("bingoLeft");
-  const R = document.getElementById("bingoRight");
-  if (!L || !R) return;
-
-  for(let i=1;i<=37;i++){
-    const s=document.createElement("span");
-    s.textContent=i;
-    s.dataset.num=i;
-    L.appendChild(s);
+/* ===== INIT FULL DRAWN GRID ===== */
+function initDrawnGrid(){
+  const d = document.getElementById("drawn");
+  d.innerHTML = "";
+  for(let i=1;i<=75;i++){
+    const b=document.createElement("div");
+    b.className="ball";
+    b.dataset.num=i;
+    b.innerText=i;
+    d.appendChild(b);
   }
-  for(let i=38;i<=75;i++){
-    const s=document.createElement("span");
-    s.textContent=i;
-    s.dataset.num=i;
-    R.appendChild(s);
-  }
-
-  window.markSideNumber = function(n){
-    const el=document.querySelector('.bingoSide span[data-num="'+n+'"]');
-    if(el) el.classList.add("drawn");
-  };
-})();
-/* ===== END SIDE NUMBERS INIT ===== */
+}
+/* ===== END INIT FULL DRAWN GRID ===== */
 
 </script>
 
@@ -452,33 +440,17 @@ audio { display:none; }
   }
 }
 
-/* ===== SIDE NUMBERS (WHITE FADED -> COLORED ON DRAW) ===== */
-.bingoSide {
-  position: fixed;
-  top: 240px;
-  width: 360px;
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 10px;
-  pointer-events: none;
-  z-index: 50;
+/* ===== DRAWN GRID FULL (1–75 PREPOPULATED) ===== */
+#drawn .ball {
+  color: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.25);
 }
 
-.bingoSide.left { left: 20px; }
-.bingoSide.right { right: 20px; }
-
-.bingoSide span {
-  font-size: 28px;
-  text-align: center;
-  color: rgba(255,255,255,0.35); /* ΑΧΝΟ ΛΕΥΚΟ */
-  font-weight: bold;
-  transition: color 0.3s ease;
+#drawn .ball.drawn {
+  color: #000;
+  background: #ff1744;
 }
-
-.bingoSide span.drawn {
-  color: #ff1744; /* ΠΑΙΡΝΕΙ ΧΡΩΜΑ ΟΤΑΝ ΚΛΗΡΩΘΕΙ */
-}
-/* ===== END SIDE NUMBERS ===== */
+/* ===== END DRAWN GRID FULL ===== */
 
 </style>
 </head>
@@ -560,6 +532,7 @@ audio { display:none; }
 
 <script>
 let auto = null;
+initDrawnGrid();
 let gameOver = false;
 let lastNearIds = new Set();
 let expectedPlayersCount = 0;
@@ -651,6 +624,8 @@ ws.onmessage = (msg) => {
 };
 
 function numbersCleared(){
+  initDrawnGrid();
+
   document.getElementById("drawn").innerHTML = "";
   document.getElementById("number").innerText = "–";
 }
@@ -739,9 +714,9 @@ function show(n, arr){
 
   document.getElementById("soundNumber").play();
 
-  const d = document.getElementById("drawn");
-  d.innerHTML = "";
-  if(window.markSideNumber) window.markSideNumber(n);
+  const d=document.getElementById("drawn");
+  const el=d.querySelector('.ball[data-num="'+n+'"]');
+  if(el) el.classList.add('drawn');
   arr.forEach(x=>{
     const b=document.createElement("div");
     b.className="ball"; 
@@ -953,40 +928,23 @@ function stopCountdown(forceHide){
   updateControls();
 }
 
-/* ===== SIDE NUMBERS INIT ===== */
-(function(){
-  const L = document.getElementById("bingoLeft");
-  const R = document.getElementById("bingoRight");
-  if (!L || !R) return;
-
-  for(let i=1;i<=37;i++){
-    const s=document.createElement("span");
-    s.textContent=i;
-    s.dataset.num=i;
-    L.appendChild(s);
+/* ===== INIT FULL DRAWN GRID ===== */
+function initDrawnGrid(){
+  const d = document.getElementById("drawn");
+  d.innerHTML = "";
+  for(let i=1;i<=75;i++){
+    const b=document.createElement("div");
+    b.className="ball";
+    b.dataset.num=i;
+    b.innerText=i;
+    d.appendChild(b);
   }
-  for(let i=38;i<=75;i++){
-    const s=document.createElement("span");
-    s.textContent=i;
-    s.dataset.num=i;
-    R.appendChild(s);
-  }
-
-  window.markSideNumber = function(n){
-    const el=document.querySelector('.bingoSide span[data-num="'+n+'"]');
-    if(el) el.classList.add("drawn");
-  };
-})();
-/* ===== END SIDE NUMBERS INIT ===== */
+}
+/* ===== END INIT FULL DRAWN GRID ===== */
 
 </script>
 
-
-<!-- SIDE NUMBERS -->
-<div class="bingoSide left" id="bingoLeft"></div>
-<div class="bingoSide right" id="bingoRight"></div>
 </body>
-
 
 </html>
 
