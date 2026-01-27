@@ -5,28 +5,28 @@
 <title>BINGO TV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js">
-/* ===== SIDE NUMBERS INIT (ISOLATED) ===== */
+/* ===== SIDE NUMBERS INIT ===== */
 (function(){
-  const left = document.getElementById("bingoLeft");
-  const right = document.getElementById("bingoRight");
-  if (!left || !right) return;
+  const L = document.getElementById("bingoLeft");
+  const R = document.getElementById("bingoRight");
+  if (!L || !R) return;
 
-  for (let i = 1; i <= 37; i++) {
-    const s = document.createElement("span");
-    s.textContent = i;
-    s.dataset.num = i;
-    left.appendChild(s);
+  for(let i=1;i<=37;i++){
+    const s=document.createElement("span");
+    s.textContent=i;
+    s.dataset.num=i;
+    L.appendChild(s);
   }
-  for (let i = 38; i <= 75; i++) {
-    const s = document.createElement("span");
-    s.textContent = i;
-    s.dataset.num = i;
-    right.appendChild(s);
+  for(let i=38;i<=75;i++){
+    const s=document.createElement("span");
+    s.textContent=i;
+    s.dataset.num=i;
+    R.appendChild(s);
   }
 
   window.markSideNumber = function(n){
-    const el = document.querySelector('.bingoSide span[data-num="' + n + '"]');
-    if (el) el.classList.add("drawn");
+    const el=document.querySelector('.bingoSide span[data-num="'+n+'"]');
+    if(el) el.classList.add("drawn");
   };
 })();
 /* ===== END SIDE NUMBERS INIT ===== */
@@ -452,30 +452,31 @@ audio { display:none; }
   }
 }
 
-/* ===== SIDE NUMBERS (SAFE, VISIBLE, NON-INTRUSIVE) ===== */
+/* ===== SIDE NUMBERS (WHITE FADED -> COLORED ON DRAW) ===== */
 .bingoSide {
   position: fixed;
-  top: 260px;
+  top: 240px;
   width: 360px;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   gap: 10px;
-  opacity: 0.25;
   pointer-events: none;
-  font-weight: bold;
-  z-index: 5;
+  z-index: 50;
 }
-.bingoSide.left { left: 10px; }
-.bingoSide.right { right: 10px; }
+
+.bingoSide.left { left: 20px; }
+.bingoSide.right { right: 20px; }
 
 .bingoSide span {
   font-size: 28px;
   text-align: center;
-  transition: opacity 0.25s ease;
+  color: rgba(255,255,255,0.35); /* ΑΧΝΟ ΛΕΥΚΟ */
+  font-weight: bold;
+  transition: color 0.3s ease;
 }
 
 .bingoSide span.drawn {
-  opacity: 1;
+  color: #ff1744; /* ΠΑΙΡΝΕΙ ΧΡΩΜΑ ΟΤΑΝ ΚΛΗΡΩΘΕΙ */
 }
 /* ===== END SIDE NUMBERS ===== */
 
@@ -740,7 +741,7 @@ function show(n, arr){
 
   const d = document.getElementById("drawn");
   d.innerHTML = "";
-  if (window.markSideNumber) window.markSideNumber(n);
+  if(window.markSideNumber) window.markSideNumber(n);
   arr.forEach(x=>{
     const b=document.createElement("div");
     b.className="ball"; 
@@ -952,28 +953,28 @@ function stopCountdown(forceHide){
   updateControls();
 }
 
-/* ===== SIDE NUMBERS INIT (ISOLATED) ===== */
+/* ===== SIDE NUMBERS INIT ===== */
 (function(){
-  const left = document.getElementById("bingoLeft");
-  const right = document.getElementById("bingoRight");
-  if (!left || !right) return;
+  const L = document.getElementById("bingoLeft");
+  const R = document.getElementById("bingoRight");
+  if (!L || !R) return;
 
-  for (let i = 1; i <= 37; i++) {
-    const s = document.createElement("span");
-    s.textContent = i;
-    s.dataset.num = i;
-    left.appendChild(s);
+  for(let i=1;i<=37;i++){
+    const s=document.createElement("span");
+    s.textContent=i;
+    s.dataset.num=i;
+    L.appendChild(s);
   }
-  for (let i = 38; i <= 75; i++) {
-    const s = document.createElement("span");
-    s.textContent = i;
-    s.dataset.num = i;
-    right.appendChild(s);
+  for(let i=38;i<=75;i++){
+    const s=document.createElement("span");
+    s.textContent=i;
+    s.dataset.num=i;
+    R.appendChild(s);
   }
 
   window.markSideNumber = function(n){
-    const el = document.querySelector('.bingoSide span[data-num="' + n + '"]');
-    if (el) el.classList.add("drawn");
+    const el=document.querySelector('.bingoSide span[data-num="'+n+'"]');
+    if(el) el.classList.add("drawn");
   };
 })();
 /* ===== END SIDE NUMBERS INIT ===== */
@@ -984,8 +985,8 @@ function stopCountdown(forceHide){
 <!-- SIDE NUMBERS -->
 <div class="bingoSide left" id="bingoLeft"></div>
 <div class="bingoSide right" id="bingoRight"></div>
-
 </body>
+
 
 </html>
 
